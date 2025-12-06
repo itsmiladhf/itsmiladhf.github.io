@@ -1,0 +1,379 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allActivities = await getCollection('tracking');
+const activities = allActivities.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Group by category
+const byCategory = activities.reduce((acc, activity) => {
+  if (!acc[activity.data.category]) acc[activity.data.category] = [];
+  acc[activity.data.category].push(activity);
+  return acc;
+}, {} as Record<string, typeof activities>);
+
+// Stats
+const stats = {
+  learning: byCategory.learning?.length || 0,
+  fitness: byCategory.fitness?.length || 0,
+  travel: byCategory.travel?.length || 0,
+  entertainment: byCategory.entertainment?.length || 0,
+  project: byCategory.project?.length || 0,
+  total: activities.length,
+};
+
+const categoryInfo = {
+  learning: { icon: '📚', label: 'Learning', color: '#3b82f6' },
+  fitness: { icon: '💪', label: 'Fitness', color: '#10b981' },
+  travel: { icon: '🌍', label: 'Travel', color: '#06b6d4' },
+  entertainment: { icon: '🎬', label: 'Entertainment', color: '#8b5cf6' },
+  project: { icon: '💻', label: 'Projects', color: '#f59e0b' },
+};
+---
+
+<BaseLayout title="Tracking · Milad">
+  <div class="tracking-container">
+    <div class="tracking-header">
+      <h1>Activity Tracker</h1>
+      <p class="subtitle">What I'm doing, learning, and experiencing</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+      {Object.entries(categoryInfo).map(([key, info]) => (
+        <div class="stat-card">
+          <span class="stat-icon">{info.icon}</span>
+          <div class="stat-content">
+            <div class="stat-number">{stats[key as keyof typeof stats]}</div>
+            <div class="stat-label">{info.label}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <!-- Activities by Category -->
+    {Object.entries(categoryInfo).map(([category, info]) => {
+      const categoryActivities = byCategory[category] || [];
+      if (categoryActivities.length === 0) return null;
+      
+      return (
+        <section class="category-section">
+          <h2>
+            <span class="category-icon">{info.icon}</span>
+            {info.label}
+            <span class="category-count">({categoryActivities.length})</span>
+          </h2>
+          
+          <div class="activities-grid">
+            {categoryActivities.slice(0, 6).map((activity) => (
+              <div class="activity-card" data-category={category}>
+                <div class="activity-header">
+                  <div class="activity-meta">
+                    <time datetime={activity.data.date.toISOString()}>
+                      {activity.data.date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </time>
+                    {activity.data.status && (
+                      <span class={`status-badge status-${activity.data.status}`}>
+                        {activity.data.status}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                <h3>{activity.data.title}</h3>
+                
+                {activity.data.metadata && (
+                  <div class="activity-metadata">
+                    {activity.data.metadata.location && (
+                      <span class="meta-item">📍 {activity.data.metadata.location}</span>
+                    )}
+                    {activity.data.metadata.duration && (
+                      <span class="meta-item">⏱️ {activity.data.metadata.duration}</span>
+                    )}
+                    {activity.data.metadata.rating && (
+                      <span class="meta-item">
+                        {'⭐'.repeat(activity.data.metadata.rating)}
+                      </span>
+                    )}
+                    {activity.data.metadata.progress && (
+                      <span class="meta-item">📊 {activity.data.metadata.progress}</span>
+                    )}
+                  </div>
+                )}
+                
+                {activity.data.tags && (
+                  <div class="activity-tags">
+                    {activity.data.tags.map(tag => (
+                      <span class="tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    })}
+
+    {activities.length === 0 && (
+      <div class="empty-state">
+        <p>No activities tracked yet. Start logging your daily activities!</p>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .tracking-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .tracking-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    padding: 3rem 0;
+  }
+
+  .tracking-header h1 {
+    font-size: clamp(3rem, 8vw, 5rem);
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 5rem;
+  }
+
+  .stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s;
+  }
+
+  .stat-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15);
+  }
+
+  .stat-icon {
+    font-size: 3rem;
+    filter: grayscale(0.3);
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+
+  .stat-card:hover .stat-icon {
+    filter: grayscale(0);
+    transform: scale(1.1);
+  }
+
+  .stat-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+    word-wrap: break-word;
+  }
+
+  /* Category Sections */
+  .category-section {
+    margin-bottom: 4rem;
+  }
+
+  .category-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+  }
+
+  .category-icon {
+    font-size: 2rem;
+  }
+
+  .category-count {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  /* Activities Grid */
+  .activities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .activity-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .activity-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .activity-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+  }
+
+  .activity-card:hover::before {
+    opacity: 1;
+  }
+
+  .activity-header {
+    margin-bottom: 1rem;
+  }
+
+  .activity-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .status-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-in-progress {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+
+  .status-completed {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+
+  .status-paused {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+
+  .activity-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .activity-metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .meta-item {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: rgba(59, 130, 246, 0.05);
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+  }
+
+  .activity-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent);
+    border-radius: 6px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+  }
+
+  @media (max-width: 768px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .activities-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+

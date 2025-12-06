@@ -1,0 +1,320 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allEvents = await getCollection('timeline');
+const events = allEvents.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+// Group events by year
+const eventsByYear = events.reduce((acc, event) => {
+  const year = event.data.date.getFullYear();
+  if (!acc[year]) acc[year] = [];
+  acc[year].push(event);
+  return acc;
+}, {} as Record<number, typeof events>);
+
+const years = Object.keys(eventsByYear).sort((a, b) => Number(b) - Number(a));
+
+const categoryColors = {
+  life: '#3b82f6',
+  work: '#8b5cf6',
+  education: '#10b981',
+  project: '#f59e0b',
+  achievement: '#ef4444',
+  travel: '#06b6d4',
+};
+
+const categoryLabels = {
+  life: 'Life',
+  work: 'Work',
+  education: 'Education',
+  project: 'Project',
+  achievement: 'Achievement',
+  travel: 'Travel',
+};
+---
+
+<BaseLayout title="Timeline · Milad">
+  <div class="timeline-container">
+    <div class="timeline-header">
+      <h1>Timeline</h1>
+      <p class="subtitle">My journey through time</p>
+    </div>
+
+    <div class="timeline-content">
+      {years.map((year) => (
+        <div class="year-section">
+          <div class="year-label">
+            <span class="year-number">{year}</span>
+          </div>
+          
+          <div class="events-list">
+            {eventsByYear[Number(year)].map((event) => (
+              <div class="timeline-event" data-category={event.data.category}>
+                <div class="event-dot" style={`background: ${categoryColors[event.data.category]}`}></div>
+                <div class="event-card">
+                  <div class="event-header">
+                    {event.data.icon && <span class="event-icon">{event.data.icon}</span>}
+                    <div class="event-meta">
+                      <time datetime={event.data.date.toISOString()}>
+                        {event.data.date.toLocaleDateString('en-US', { 
+                          month: 'long', 
+                          day: 'numeric'
+                        })}
+                      </time>
+                      <span class="event-category" style={`color: ${categoryColors[event.data.category]}`}>
+                        {categoryLabels[event.data.category]}
+                      </span>
+                    </div>
+                  </div>
+                  <h3>{event.data.title}</h3>
+                  <p>{event.data.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div class="legend">
+      <h3>Categories</h3>
+      <div class="legend-items">
+        {Object.entries(categoryLabels).map(([key, label]) => (
+          <div class="legend-item">
+            <span class="legend-dot" style={`background: ${categoryColors[key as keyof typeof categoryColors]}`}></span>
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .timeline-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .timeline-header {
+    text-align: center;
+    margin-bottom: 5rem;
+    padding: 3rem 0;
+  }
+
+  .timeline-header h1 {
+    font-size: clamp(3rem, 8vw, 5rem);
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  .timeline-content {
+    position: relative;
+    padding-left: 3rem;
+  }
+
+  .timeline-content::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 100px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+  }
+
+  .year-section {
+    margin-bottom: 4rem;
+  }
+
+  .year-label {
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .year-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 12px;
+    border: 2px solid var(--accent);
+  }
+
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .timeline-event {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+
+  .event-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1.5rem;
+    position: absolute;
+    left: -3rem;
+    box-shadow: 0 0 20px currentColor;
+    z-index: 2;
+  }
+
+  .event-card {
+    flex: 1;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .event-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .event-card:hover {
+    border-color: var(--accent);
+    transform: translateX(8px);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15);
+  }
+
+  .event-card:hover::before {
+    opacity: 1;
+  }
+
+  .event-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .event-icon {
+    font-size: 2rem;
+    filter: grayscale(0.3);
+    transition: all 0.3s;
+  }
+
+  .event-card:hover .event-icon {
+    filter: grayscale(0);
+    transform: scale(1.1);
+  }
+
+  .event-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .event-category {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .event-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+  }
+
+  .event-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  .legend {
+    margin-top: 5rem;
+    padding: 2rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+
+  .legend h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+  }
+
+  .legend-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  .legend-item span:last-child {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 768px) {
+    .timeline-content {
+      padding-left: 2rem;
+    }
+
+    .event-dot {
+      left: -2rem;
+    }
+
+    .year-number {
+      font-size: 2rem;
+    }
+
+    .legend-items {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
