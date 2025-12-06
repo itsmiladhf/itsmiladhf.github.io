@@ -1,0 +1,292 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About · Milad">
+  <div class="about-container">
+    <div class="about-header">
+      <h1>About Me</h1>
+      <p class="subtitle">Developer, writer, and lifelong learner</p>
+    </div>
+
+    <section class="bio-section">
+      <div class="content-card">
+        <h2>👋 Hi, I'm Milad</h2>
+        <p>
+          Welcome to my personal space on the web. I'm a developer passionate about building
+          things that matter. This site is where I share my thoughts, document my journey,
+          and explore ideas that interest me.
+        </p>
+        <p>
+          I believe in continuous learning, meaningful work, and the power of sharing knowledge.
+          Whether it's through code, writing, or conversation, I'm always looking to grow and
+          contribute to the tech community.
+        </p>
+      </div>
+    </section>
+
+    <section class="interests-section">
+      <h2>What I'm Into</h2>
+      <div class="interests-grid">
+        <div class="interest-card">
+          <div class="icon">💻</div>
+          <h3>Development</h3>
+          <p>Building applications, exploring new technologies, and writing clean code.</p>
+        </div>
+        <div class="interest-card">
+          <div class="icon">✍️</div>
+          <h3>Writing</h3>
+          <p>Sharing insights, documenting learning, and exploring ideas through words.</p>
+        </div>
+        <div class="interest-card">
+          <div class="icon">🚀</div>
+          <h3>Learning</h3>
+          <p>Always curious about new concepts, tools, and ways of thinking.</p>
+        </div>
+        <div class="interest-card">
+          <div class="icon">🌍</div>
+          <h3>Exploring</h3>
+          <p>Discovering new places, cultures, and perspectives on life.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="currently-section">
+      <div class="content-card accent-border">
+        <h2>Currently</h2>
+        <ul class="current-list">
+          <li>🔨 Building this website and experimenting with Astro</li>
+          <li>📚 Reading and learning new things daily</li>
+          <li>💭 Thinking about what to write next</li>
+          <li>🎯 Focused on creating meaningful projects</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="connect-section">
+      <h2>Let's Connect</h2>
+      <p class="connect-intro">
+        Feel free to reach out if you want to chat about tech, collaborate on projects,
+        or just say hi!
+      </p>
+        <div class="social-links">
+        <a href="https://github.com/itsmiladhf" target="_blank" rel="noopener noreferrer" class="social-link" title="GitHub">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+        </a>
+        <a href="https://x.com/miladhf" target="_blank" rel="noopener noreferrer" class="social-link" title="X / Twitter">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+        </a>
+        <a href="mailto:itsmiladhf@gmail.com" class="social-link" title="Email">
+            <svg class="icon-svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
+        </a>
+        </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .about-header {
+    text-align: center;
+    margin-bottom: 5rem;
+    padding: 3rem 0;
+  }
+
+  .about-header h1 {
+    font-size: clamp(3rem, 8vw, 5rem);
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+
+  section {
+    margin-bottom: 5rem;
+  }
+
+  section h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+  }
+
+  .content-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 3rem;
+    transition: all 0.3s;
+  }
+
+  .content-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15);
+  }
+
+  .accent-border {
+    border-left: 4px solid var(--accent);
+  }
+
+  .bio-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+  }
+
+  .bio-section p {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+
+  .bio-section p:last-child {
+    margin-bottom: 0;
+  }
+
+  .interests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .interest-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s;
+    text-align: center;
+  }
+
+  .interest-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.2);
+  }
+
+  .icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    filter: grayscale(0.3);
+    transition: all 0.3s;
+  }
+
+  .interest-card:hover .icon {
+    filter: grayscale(0);
+    transform: scale(1.1);
+  }
+
+  .interest-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+  }
+
+  .interest-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+
+  .current-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .current-list li {
+    font-size: 1.15rem;
+    line-height: 2;
+    color: var(--text-secondary);
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .current-list li:last-child {
+    border-bottom: none;
+  }
+
+  .connect-section {
+    text-align: center;
+  }
+
+  .connect-intro {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    margin-bottom: 2.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .social-links {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.3s;
+  }
+
+  .social-link:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent);
+  }
+
+  .icon-svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  @media (max-width: 768px) {
+    .about-header {
+      margin-bottom: 3rem;
+    }
+
+    .content-card {
+      padding: 2rem;
+    }
+
+    .interests-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .social-links {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
