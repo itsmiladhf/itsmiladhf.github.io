@@ -22,7 +22,14 @@ const { title, description = "Milad's personal space on the web" } = Astro.props
 <body>
   <nav>
     <div class="nav-container">
-      <a href="/" class="logo">MILAD</a>
+      <div class="logo-section">
+        <a href="/" class="logo">MILAD</a>
+        <a href="https://x.com/miladhf" target="_blank" rel="noopener noreferrer" class="logo-social" title="Follow on X">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+          </svg>
+        </a>
+      </div>
       <div class="nav-links">
         <a href="/blog">Blog</a>
         <a href="/timeline">Timeline</a>
@@ -94,6 +101,36 @@ const { title, description = "Milad's personal space on the web" } = Astro.props
     color: var(--text-primary);
     text-decoration: none;
     letter-spacing: -0.02em;
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: var(--text-secondary);
+    transition: all 0.3s;
+    border-radius: 6px;
+    border: 1px solid transparent;
+  }
+
+  .logo-social:hover {
+    color: var(--accent);
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--accent);
+    transform: scale(1.1);
+  }
+
+  .logo-social svg {
+    width: 16px;
+    height: 16px;
   }
 
   .nav-links {
