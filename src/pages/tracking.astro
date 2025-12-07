@@ -2,126 +2,120 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-const allActivities = await getCollection('tracking');
-const activities = allActivities.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const allLogs = await getCollection('dailylog');
+const logs = allLogs.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
-// Group by category
-const byCategory = activities.reduce((acc, activity) => {
-  if (!acc[activity.data.category]) acc[activity.data.category] = [];
-  acc[activity.data.category].push(activity);
-  return acc;
-}, {} as Record<string, typeof activities>);
+// Calculate stats
+const totalDays = logs.length;
+const totalActivities = logs.reduce((sum, log) => sum + log.data.activities.length, 0);
 
-// Stats
-const stats = {
-  learning: byCategory.learning?.length || 0,
-  fitness: byCategory.fitness?.length || 0,
-  travel: byCategory.travel?.length || 0,
-  entertainment: byCategory.entertainment?.length || 0,
-  project: byCategory.project?.length || 0,
-  total: activities.length,
+// Count activities by category
+const categoryCount: Record<string, number> = {};
+logs.forEach(log => {
+  log.data.activities.forEach(activity => {
+    const cat = activity.category || 'other';
+    categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+  });
+});
+
+// Mood counts
+const moodCount: Record<string, number> = {};
+logs.forEach(log => {
+  if (log.data.mood) {
+    moodCount[log.data.mood] = (moodCount[log.data.mood] || 0) + 1;
+  }
+});
+
+const moodEmoji: Record<string, string> = {
+  great: '🔥',
+  good: '😊',
+  okay: '😐',
+  rough: '😔'
 };
 
-const categoryInfo = {
-  learning: { icon: '📚', label: 'Learning', color: '#3b82f6' },
-  fitness: { icon: '💪', label: 'Fitness', color: '#10b981' },
-  travel: { icon: '🌍', label: 'Travel', color: '#06b6d4' },
-  entertainment: { icon: '🎬', label: 'Entertainment', color: '#8b5cf6' },
-  project: { icon: '💻', label: 'Projects', color: '#f59e0b' },
+const categoryEmoji: Record<string, string> = {
+  fitness: '💪',
+  learning: '📚',
+  entertainment: '🎬',
+  project: '💻',
+  travel: '✈️',
+  social: '👥',
+  other: '📝'
 };
 ---
 
-<BaseLayout title="Tracking · Milad">
+<BaseLayout title="Daily Log · Milad">
   <div class="tracking-container">
     <div class="tracking-header">
-      <h1>Activity Tracker</h1>
-      <p class="subtitle">What I'm doing, learning, and experiencing</p>
+      <h1>Daily Log</h1>
+      <p class="subtitle">What I'm doing, day by day</p>
     </div>
 
-    <!-- Stats Overview -->
-    <div class="stats-grid">
-      {Object.entries(categoryInfo).map(([key, info]) => (
-        <div class="stat-card">
-          <span class="stat-icon">{info.icon}</span>
-          <div class="stat-content">
-            <div class="stat-number">{stats[key as keyof typeof stats]}</div>
-            <div class="stat-label">{info.label}</div>
-          </div>
+    <!-- Quick Stats -->
+    <div class="stats-row">
+      <div class="stat-pill">
+        <span class="stat-number">{totalDays}</span>
+        <span class="stat-label">days logged</span>
+      </div>
+      <div class="stat-pill">
+        <span class="stat-number">{totalActivities}</span>
+        <span class="stat-label">activities</span>
+      </div>
+      {Object.entries(moodCount).map(([mood, count]) => (
+        <div class="stat-pill mood-pill">
+          <span class="stat-emoji">{moodEmoji[mood]}</span>
+          <span class="stat-number">{count}</span>
         </div>
       ))}
     </div>
 
-    <!-- Activities by Category -->
-    {Object.entries(categoryInfo).map(([category, info]) => {
-      const categoryActivities = byCategory[category] || [];
-      if (categoryActivities.length === 0) return null;
-      
-      return (
-        <section class="category-section">
-          <h2>
-            <span class="category-icon">{info.icon}</span>
-            {info.label}
-            <span class="category-count">({categoryActivities.length})</span>
-          </h2>
-          
-          <div class="activities-grid">
-            {categoryActivities.slice(0, 6).map((activity) => (
-              <div class="activity-card" data-category={category}>
-                <div class="activity-header">
-                  <div class="activity-meta">
-                    <time datetime={activity.data.date.toISOString()}>
-                      {activity.data.date.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </time>
-                    {activity.data.status && (
-                      <span class={`status-badge status-${activity.data.status}`}>
-                        {activity.data.status}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                
-                <h3>{activity.data.title}</h3>
-                
-                {activity.data.metadata && (
-                  <div class="activity-metadata">
-                    {activity.data.metadata.location && (
-                      <span class="meta-item">📍 {activity.data.metadata.location}</span>
-                    )}
-                    {activity.data.metadata.duration && (
-                      <span class="meta-item">⏱️ {activity.data.metadata.duration}</span>
-                    )}
-                    {activity.data.metadata.rating && (
-                      <span class="meta-item">
-                        {'⭐'.repeat(activity.data.metadata.rating)}
-                      </span>
-                    )}
-                    {activity.data.metadata.progress && (
-                      <span class="meta-item">📊 {activity.data.metadata.progress}</span>
-                    )}
-                  </div>
-                )}
-                
-                {activity.data.tags && (
-                  <div class="activity-tags">
-                    {activity.data.tags.map(tag => (
-                      <span class="tag">{tag}</span>
-                    ))}
-                  </div>
-                )}
+    <!-- Daily Entries -->
+    <div class="logs-container">
+      {logs.map(async (log) => {
+        const { Content } = await log.render();
+        const dayName = log.data.date.toLocaleDateString('en-US', { weekday: 'long' });
+        const dateStr = log.data.date.toLocaleDateString('en-US', { 
+          month: 'long', 
+          day: 'numeric',
+          year: 'numeric'
+        });
+        
+        return (
+          <article class="day-card">
+            <header class="day-header">
+              <div class="day-date">
+                <span class="day-name">{dayName}</span>
+                <span class="date-full">{dateStr}</span>
               </div>
-            ))}
-          </div>
-        </section>
-      );
-    })}
+              {log.data.mood && (
+                <span class="mood-badge" data-mood={log.data.mood}>
+                  {moodEmoji[log.data.mood]} {log.data.mood}
+                </span>
+              )}
+            </header>
+            
+            <ul class="activities-list">
+              {log.data.activities.map(activity => (
+                <li class="activity-item">
+                  <span class="activity-icon">{activity.icon}</span>
+                  <span class="activity-text">{activity.text}</span>
+                </li>
+              ))}
+            </ul>
+            
+            {log.body.trim() && (
+              <div class="day-notes">
+                <Content />
+              </div>
+            )}
+          </article>
+        );
+      })}
+    </div>
 
-    {activities.length === 0 && (
+    {logs.length === 0 && (
       <div class="empty-state">
-        <p>No activities tracked yet. Start logging your daily activities!</p>
+        <p>No daily logs yet. Start documenting your days!</p>
       </div>
     )}
   </div>
@@ -129,19 +123,19 @@ const categoryInfo = {
 
 <style>
   .tracking-container {
-    max-width: 1200px;
+    max-width: 800px;
     margin: 0 auto;
   }
 
   .tracking-header {
     text-align: center;
-    margin-bottom: 4rem;
-    padding: 3rem 0;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
   }
 
   .tracking-header h1 {
-    font-size: clamp(3rem, 8vw, 5rem);
-    margin-bottom: 1rem;
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    margin-bottom: 0.5rem;
     background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -149,231 +143,194 @@ const categoryInfo = {
   }
 
   .subtitle {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--text-secondary);
-    font-weight: 400;
   }
 
-  /* Stats Grid */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 5rem;
+  /* Stats Row */
+  .stats-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
   }
 
-  .stat-card {
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .stat-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+
+  .stat-emoji {
+    font-size: 1.25rem;
+  }
+
+  /* Day Cards */
+  .logs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .day-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
     transition: all 0.3s;
   }
 
-  .stat-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15);
+  .day-card:hover {
+    border-color: rgba(59, 130, 246, 0.3);
   }
 
-  .stat-icon {
-    font-size: 3rem;
-    filter: grayscale(0.3);
-    transition: all 0.3s;
-    flex-shrink: 0;
-  }
-
-  .stat-card:hover .stat-icon {
-    filter: grayscale(0);
-    transform: scale(1.1);
-  }
-
-  .stat-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .stat-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-top: 0.5rem;
-    word-wrap: break-word;
-  }
-
-  /* Category Sections */
-  .category-section {
-    margin-bottom: 4rem;
-  }
-
-  .category-section h2 {
+  .day-header {
     display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 2rem;
-    margin-bottom: 2rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .day-date {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .day-name {
+    font-size: 1.5rem;
+    font-weight: 600;
     color: var(--text-primary);
   }
 
-  .category-icon {
-    font-size: 2rem;
-  }
-
-  .category-count {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-    font-weight: 400;
-  }
-
-  /* Activities Grid */
-  .activities-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .activity-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .activity-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--accent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .activity-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
-  }
-
-  .activity-card:hover::before {
-    opacity: 1;
-  }
-
-  .activity-header {
-    margin-bottom: 1rem;
-  }
-
-  .activity-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  time {
+  .date-full {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: var(--text-secondary);
-    font-weight: 600;
   }
 
-  .status-badge {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 6px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  .mood-badge {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+    text-transform: capitalize;
   }
 
-  .status-in-progress {
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-    border: 1px solid rgba(59, 130, 246, 0.2);
-  }
-
-  .status-completed {
+  .mood-badge[data-mood="great"] {
     background: rgba(16, 185, 129, 0.1);
     color: #10b981;
     border: 1px solid rgba(16, 185, 129, 0.2);
   }
 
-  .status-paused {
+  .mood-badge[data-mood="good"] {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+
+  .mood-badge[data-mood="okay"] {
     background: rgba(245, 158, 11, 0.1);
     color: #f59e0b;
     border: 1px solid rgba(245, 158, 11, 0.2);
   }
 
-  .activity-card h3 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-    color: var(--text-primary);
-    line-height: 1.3;
+  .mood-badge[data-mood="rough"] {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
   }
 
-  .activity-metadata {
+  /* Activities List */
+  .activities-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 0.75rem;
-    margin-bottom: 1rem;
   }
 
-  .meta-item {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    background: rgba(59, 130, 246, 0.05);
-    padding: 0.25rem 0.75rem;
-    border-radius: 6px;
-  }
-
-  .activity-tags {
+  .activity-item {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: rgba(59, 130, 246, 0.03);
+    border-radius: 8px;
+    transition: all 0.2s;
   }
 
-  .tag {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.75rem;
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--accent);
-    border-radius: 6px;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+  .activity-item:hover {
+    background: rgba(59, 130, 246, 0.08);
   }
 
+  .activity-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .activity-text {
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  /* Day Notes */
+  .day-notes {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-style: italic;
+    line-height: 1.7;
+  }
+
+  .day-notes p {
+    margin: 0;
+  }
+
+  /* Empty State */
   .empty-state {
     text-align: center;
     padding: 4rem 2rem;
     color: var(--text-secondary);
-    font-size: 1.15rem;
   }
 
   @media (max-width: 768px) {
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
+    .day-header {
+      flex-direction: column;
+      gap: 1rem;
     }
 
-    .activities-grid {
-      grid-template-columns: 1fr;
+    .stats-row {
+      gap: 0.75rem;
+    }
+
+    .stat-pill {
+      padding: 0.5rem 1rem;
+    }
+
+    .day-card {
+      padding: 1.5rem;
     }
   }
 </style>
-

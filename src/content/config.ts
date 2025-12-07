@@ -22,21 +22,17 @@ const timeline = defineCollection({
   }),
 });
 
-const tracking = defineCollection({
+const dailylog = defineCollection({
   type: 'content',
   schema: z.object({
-    title: z.string(),
-    category: z.enum(['learning', 'fitness', 'travel', 'entertainment', 'project']),
     date: z.date(),
-    status: z.enum(['in-progress', 'completed', 'paused']).optional(),
-    tags: z.array(z.string()).optional(),
-    metadata: z.object({
-      location: z.string().optional(),
-      duration: z.string().optional(),
-      rating: z.number().min(1).max(5).optional(),
-      progress: z.string().optional(),
-    }).optional(),
+    mood: z.enum(['great', 'good', 'okay', 'rough']).optional(),
+    activities: z.array(z.object({
+      icon: z.string(),
+      text: z.string(),
+      category: z.enum(['fitness', 'learning', 'entertainment', 'project', 'travel', 'social', 'other']).optional(),
+    })),
   }),
 });
 
-export const collections = { blog, timeline, tracking };
+export const collections = { blog, timeline, dailylog };

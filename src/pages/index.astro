@@ -8,12 +8,6 @@ const recentPosts = allPosts
   .filter(post => !post.data.draft)
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 3);
-
-// Fetch timeline events
-const allEvents = await getCollection('timeline');
-const recentEvents = allEvents
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
-  .slice(0, 3);
 ---
 
 <BaseLayout title="Milad · Home">
@@ -57,30 +51,6 @@ const recentEvents = allEvents
       ))}
     </div>
     <a href="/blog" class="view-more">View All Posts →</a>
-  </section>
-
-  <section class="section">
-    <h2 class="section-title">Timeline Highlights</h2>
-    <div class="timeline-preview">
-      {recentEvents.map((event) => (
-        <div class="timeline-item">
-          <div class="timeline-dot"></div>
-          <div class="timeline-content">
-            <span class="timeline-year">
-              {event.data.date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short'
-              })}
-            </span>
-            <p>
-              {event.data.icon && <span class="event-icon">{event.data.icon}</span>}
-              {event.data.title}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-    <a href="/timeline" class="view-more">View Full Timeline →</a>
   </section>
 </BaseLayout>
 
