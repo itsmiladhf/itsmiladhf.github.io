@@ -35,4 +35,15 @@ const dailylog = defineCollection({
   }),
 });
 
-export const collections = { blog, timeline, dailylog };
+const reading = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    author: z.string().optional(),
+    url: z.string(),
+    date: z.date(),
+    type: z.enum(['article', 'paper', 'book', 'video', 'podcast', 'other']).optional(),
+  }),
+});
+
+export const collections = { blog, timeline, dailylog, reading };

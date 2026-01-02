@@ -1,0 +1,205 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allReads = await getCollection('reading');
+const reads = allReads.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const typeIcons: Record<string, string> = {
+  article: '📄',
+  paper: '📑',
+  book: '📚',
+  video: '🎬',
+  podcast: '🎙️',
+  other: '🔗'
+};
+---
+
+<BaseLayout title="Reading · Milad">
+  <div class="reading-container">
+    <div class="reading-header">
+      <h1>Reading</h1>
+      <p class="subtitle">Things I've been reading and thinking about</p>
+    </div>
+
+    <div class="reads-list">
+      {reads.map(async (read) => {
+        const { Content } = await read.render();
+        const dateStr = read.data.date.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric',
+          year: 'numeric'
+        });
+        const type = read.data.type || 'other';
+        
+        return (
+          <article class="read-card">
+            <div class="read-meta">
+              <span class="read-type" title={type}>{typeIcons[type]}</span>
+              <span class="read-date">{dateStr}</span>
+            </div>
+            <div class="read-content">
+              <a href={read.data.url} target="_blank" rel="noopener noreferrer" class="read-title">
+                {read.data.title}
+                <svg class="external-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+              {read.data.author && (
+                <span class="read-author">by {read.data.author}</span>
+              )}
+              {read.body?.trim() && (
+                <div class="read-note">
+                  <Content />
+                </div>
+              )}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+
+    {reads.length === 0 && (
+      <div class="empty-state">
+        <p>No reads yet. Check back soon!</p>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .reading-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .reading-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
+
+  .reading-header h1 {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+  }
+
+  .reads-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .read-card {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: all 0.3s;
+  }
+
+  .read-card:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateX(4px);
+  }
+
+  .read-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 80px;
+  }
+
+  .read-type {
+    font-size: 1.5rem;
+  }
+
+  .read-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  .read-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .read-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color 0.2s;
+  }
+
+  .read-title:hover {
+    color: var(--accent);
+  }
+
+  .external-icon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.5;
+    flex-shrink: 0;
+  }
+
+  .read-title:hover .external-icon {
+    opacity: 1;
+  }
+
+  .read-author {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+
+  .read-note {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .read-note p {
+    margin: 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 768px) {
+    .read-card {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .read-meta {
+      flex-direction: row;
+      justify-content: flex-start;
+    }
+  }
+</style>
+
