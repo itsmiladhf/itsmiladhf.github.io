@@ -229,78 +229,6 @@ const recentPosts = allPosts
     border: 1px solid rgba(59, 130, 246, 0.2);
   }
 
-  .timeline-preview {
-    display: flex;
-    flex-direction: column;
-    gap: 2.5rem;
-    margin-bottom: 2rem;
-    position: relative;
-    padding-left: 2.5rem;
-  }
-
-  .timeline-preview::before {
-    content: '';
-    position: absolute;
-    left: 7px;
-    top: 20px;
-    bottom: 20px;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--accent), transparent);
-  }
-
-  .timeline-item {
-    display: flex;
-    gap: 1.5rem;
-    align-items: flex-start;
-    position: relative;
-  }
-
-  .timeline-dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 20px var(--accent-glow);
-    flex-shrink: 0;
-    margin-top: 0.25rem;
-    position: absolute;
-    left: -2.5rem;
-    z-index: 1;
-  }
-
-  .timeline-content {
-    flex: 1;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1.5rem;
-    transition: all 0.3s;
-  }
-
-  .timeline-content:hover {
-    border-color: var(--accent);
-    transform: translateX(8px);
-  }
-
-  .timeline-year {
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--accent);
-    font-weight: 600;
-    font-size: 0.875rem;
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-
-  .timeline-content p {
-    margin: 0;
-    color: var(--text-primary);
-    font-weight: 500;
-  }
-
-  .timeline-content .event-icon {
-    margin-right: 0.5rem;
-  }
-
   .view-more {
     color: var(--accent);
     text-decoration: none;
@@ -330,8 +258,5 @@ const recentPosts = allPosts
       align-items: stretch;
     }
 
-    .timeline-preview {
-      padding-left: 2rem;
-    }
   }
 </style>

@@ -11,29 +11,6 @@ const blog = defineCollection({
   }),
 });
 
-const timeline = defineCollection({
-  type: 'content',
-  schema: z.object({
-    title: z.string(),
-    date: z.date(),
-    category: z.enum(['life', 'work', 'education', 'project', 'achievement', 'travel']),
-    description: z.string(),
-    icon: z.string().optional(),
-  }),
-});
-
-const dailylog = defineCollection({
-  type: 'content',
-  schema: z.object({
-    date: z.date(),
-    mood: z.enum(['great', 'good', 'okay', 'rough']).optional(),
-    activities: z.array(z.object({
-      icon: z.string(),
-      text: z.string(),
-      category: z.enum(['fitness', 'learning', 'entertainment', 'project', 'travel', 'social', 'other']).optional(),
-    })),
-  }),
-});
 
 const reading = defineCollection({
   type: 'content',
@@ -46,4 +23,4 @@ const reading = defineCollection({
   }),
 });
 
-export const collections = { blog, timeline, dailylog, reading };
+export const collections = { blog, reading };
